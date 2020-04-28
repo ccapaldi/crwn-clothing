@@ -6,9 +6,9 @@ import HomePage from './pages/homepage/homepage.component';
 import ShopPage from './pages/shop/shop.component';
 import SignInAndSignUp from './pages/sign-in-and-sign-up/sign-in-and-sign-up.component';
 import Header from './components/header/header.component';
-import { auth } from './firebase/firebase.utils';
+import { auth, createUserProfileDocument } from './firebase/firebase.utils';
 
-import { ReactComponent } from '../src/assets/original.svg';
+//import { ReactComponent } from '../src/assets/original.svg';
 
 class  App extends React.Component {
   constructor() {
@@ -21,10 +21,31 @@ class  App extends React.Component {
 unsubscribeFromAuth = null
 
   componentDidMount() {
-   this.unsubscribeFromAuth =  auth.onAuthStateChanged(user => {
-      this.setState({currentUser: user});
+   this.unsubscribeFromAuth =  auth.onAuthStateChanged(async userAuth => {
+      //this.setState({currentUser: user});
+      console.log("Firing user profile");
+      if(userAuth) {
+        const userRef = await createUserProfileDocument(userAuth);
 
-      console.log(user)
+        userRef.onSnapshot( snapShot => {
+          //console.log(snapShot.data());
+          this.setState({
+            currentUser: {
+              id: snapShot.id,
+              ...snapShot.data()
+            }
+          })
+        });
+        
+        this.setState({currentUser: userAuth});
+      } 
+        
+        
+        
+      
+
+      //createUserProfileDocument(user);
+      //console.log(user)
     })
   
   }
